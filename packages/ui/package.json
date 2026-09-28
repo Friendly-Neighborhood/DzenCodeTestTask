@@ -1,0 +1,21 @@
+{
+  "name": "@orders-hub/ui",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts",
+    "./styles.css": "./src/styles.css"
+  },
+  "dependencies": {
+    "@orders-hub/shared": "*"
+  },
+  "peerDependencies": {
+    "react": ">=19",
+    "react-dom": ">=19"
+  },
+  "devDependencies": {
+    "@types/react": "^19.0.8",
+    "typescript": "^5.7.3"
+  }
+}

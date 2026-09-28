@@ -1,0 +1,29 @@
+{
+  "name": "orders-products-middle-plus",
+  "private": true,
+  "version": "1.0.0",
+  "workspaces": [
+    "apps/*",
+    "packages/*",
+    "services/*"
+  ],
+  "scripts": {
+    "dev": "concurrently -n shell,orders,products,api,realtime \"npm run dev -w @orders-hub/shell\" \"npm run dev -w @orders-hub/orders\" \"npm run dev -w @orders-hub/products\" \"npm run dev -w @orders-hub/api\" \"npm run dev -w @orders-hub/realtime\"",
+    "dev:infra": "docker compose up -d mysql redis",
+    "build": "npm run build -w @orders-hub/api && npm run build -w @orders-hub/realtime && npm run build -w @orders-hub/shell && npm run build -w @orders-hub/orders && npm run build -w @orders-hub/products",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:e2e": "playwright test",
+    "db:push": "npm run db:push -w @orders-hub/api",
+    "db:seed": "npm run db:seed -w @orders-hub/api",
+    "docker:up": "docker compose up --build",
+    "docker:down": "docker compose down -v"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.51.0",
+    "concurrently": "^9.1.2",
+    "typescript": "^5.7.3",
+    "vitest": "^3.0.7",
+    "@types/node": "^22.13.4"
+  }
+}

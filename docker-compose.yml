@@ -1,0 +1,101 @@
+services:
+  mysql:
+    image: mysql:8.4
+    environment:
+      MYSQL_DATABASE: orders_hub
+      MYSQL_USER: orders
+      MYSQL_PASSWORD: orders
+      MYSQL_ROOT_PASSWORD: root
+    ports:
+      - "3307:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-proot"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+  redis:
+    image: redis:7.4-alpine
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+  api:
+    build:
+      context: .
+      dockerfile: docker/api.Dockerfile
+    environment:
+      DATABASE_URL: mysql://orders:orders@mysql:3306/orders_hub
+      REDIS_URL: redis://redis:6379
+      JWT_SECRET: local-development-secret-change-me
+      PORT: 4000
+    ports:
+      - "4000:4000"
+    depends_on:
+      mysql:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+  realtime:
+    build:
+      context: .
+      dockerfile: docker/realtime.Dockerfile
+    environment:
+      REDIS_URL: redis://redis:6379
+      REALTIME_PORT: 4001
+    ports:
+      - "4001:4001"
+    depends_on:
+      redis:
+        condition: service_healthy
+  orders-web:
+    build:
+      context: .
+      dockerfile: docker/web.Dockerfile
+      args:
+        WORKSPACE: "@orders-hub/orders"
+    environment:
+      PORT: 3001
+      NEXT_PUBLIC_API_URL: http://localhost:4000
+      NEXT_PUBLIC_WS_URL: http://localhost:4001
+    depends_on:
+      - api
+      - realtime
+  products-web:
+    build:
+      context: .
+      dockerfile: docker/web.Dockerfile
+      args:
+        WORKSPACE: "@orders-hub/products"
+    environment:
+      PORT: 3002
+      NEXT_PUBLIC_API_URL: http://localhost:4000
+      NEXT_PUBLIC_WS_URL: http://localhost:4001
+    depends_on:
+      - api
+      - realtime
+  shell:
+    build:
+      context: .
+      dockerfile: docker/web.Dockerfile
+      args:
+        WORKSPACE: "@orders-hub/shell"
+    environment:
+      PORT: 3000
+      ORDERS_ORIGIN: http://orders-web:3001
+      PRODUCTS_ORIGIN: http://products-web:3002
+      NEXT_PUBLIC_API_URL: http://localhost:4000
+      NEXT_PUBLIC_WS_URL: http://localhost:4001
+    ports:
+      - "3000:3000"
+    depends_on:
+      - orders-web
+      - products-web
+      - api
+      - realtime
+volumes:
+  mysql_data:
