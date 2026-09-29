@@ -41,6 +41,12 @@ TopMenu показывает дату и время в реальном врем
 
 Dashboard содержит lazy-loaded chart и map. Язык EN/RU хранится в Local Storage. JWT хранится в Session Storage. PWA service workers подключены для shell и feature zones.
 
+## Публикация в интернет через Railway
+
+Для cloud deployment без собственного VPS подготовлена конфигурация в `deploy/railway`. Код хранится в GitHub, а frontend, API, WebSocket, MySQL и Redis постоянно работают в Railway. Компьютер разработчика после deployment не нужен.
+
+Пошаговая инструкция находится в `deploy/railway/README.md`.
+
 ## Быстрый запуск через Docker
 
 ```bash
